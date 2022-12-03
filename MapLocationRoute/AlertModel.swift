@@ -15,7 +15,7 @@ class AlertModel {
     func showAlert(title: String, descr: String, buttonText: String) {
         let alert = UIAlertController(title: title, message: descr, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: buttonText, style: .default))
-        UIApplication.topViewController()!.present(alert, animated: true)
+        UIApplication.topViewController()?.present(alert, animated: true)
     }
 }
 

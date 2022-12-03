@@ -12,10 +12,11 @@
 		B55E22FB293B95A900EB30D5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B55E22FA293B95A900EB30D5 /* Assets.xcassets */; };
 		B55E22FE293B95A900EB30D5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B55E22FC293B95A900EB30D5 /* LaunchScreen.storyboard */; };
 		B55E2308293B965900EB30D5 /* VisitedPlaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E2305293B965800EB30D5 /* VisitedPlaces.swift */; };
-		B55E2309293B965900EB30D5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E2306293B965800EB30D5 /* ViewController.swift */; };
+		B55E2309293B965900EB30D5 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E2306293B965800EB30D5 /* MapViewController.swift */; };
 		B55E230A293B965900EB30D5 /* CoreLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E2307293B965800EB30D5 /* CoreLocationManager.swift */; };
 		B55E230D293B968400EB30D5 /* JGProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = B55E230C293B968400EB30D5 /* JGProgressHUD */; };
 		B55E230F293BAFD800EB30D5 /* AlertModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E230E293BAFD800EB30D5 /* AlertModel.swift */; };
+		B55E2311293BB82400EB30D5 /* IndicatorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E2310293BB82400EB30D5 /* IndicatorModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,9 +27,10 @@
 		B55E22FD293B95A900EB30D5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B55E22FF293B95A900EB30D5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B55E2305293B965800EB30D5 /* VisitedPlaces.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisitedPlaces.swift; sourceTree = "<group>"; };
-		B55E2306293B965800EB30D5 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		B55E2306293B965800EB30D5 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		B55E2307293B965800EB30D5 /* CoreLocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreLocationManager.swift; sourceTree = "<group>"; };
 		B55E230E293BAFD800EB30D5 /* AlertModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertModel.swift; sourceTree = "<group>"; };
+		B55E2310293BB82400EB30D5 /* IndicatorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,10 +66,11 @@
 			children = (
 				B55E22F1293B95A700EB30D5 /* AppDelegate.swift */,
 				B55E22F3293B95A700EB30D5 /* SceneDelegate.swift */,
-				B55E2307293B965800EB30D5 /* CoreLocationManager.swift */,
-				B55E2306293B965800EB30D5 /* ViewController.swift */,
+				B55E2306293B965800EB30D5 /* MapViewController.swift */,
 				B55E2305293B965800EB30D5 /* VisitedPlaces.swift */,
+				B55E2307293B965800EB30D5 /* CoreLocationManager.swift */,
 				B55E230E293BAFD800EB30D5 /* AlertModel.swift */,
+				B55E2310293BB82400EB30D5 /* IndicatorModel.swift */,
 				B55E22FA293B95A900EB30D5 /* Assets.xcassets */,
 				B55E22FC293B95A900EB30D5 /* LaunchScreen.storyboard */,
 				B55E22FF293B95A900EB30D5 /* Info.plist */,
@@ -151,10 +154,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B55E2311293BB82400EB30D5 /* IndicatorModel.swift in Sources */,
 				B55E22F2293B95A700EB30D5 /* AppDelegate.swift in Sources */,
 				B55E22F4293B95A700EB30D5 /* SceneDelegate.swift in Sources */,
 				B55E230A293B965900EB30D5 /* CoreLocationManager.swift in Sources */,
-				B55E2309293B965900EB30D5 /* ViewController.swift in Sources */,
+				B55E2309293B965900EB30D5 /* MapViewController.swift in Sources */,
 				B55E230F293BAFD800EB30D5 /* AlertModel.swift in Sources */,
 				B55E2308293B965900EB30D5 /* VisitedPlaces.swift in Sources */,
 			);

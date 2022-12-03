@@ -10,16 +10,7 @@ import MapKit
 import CoreLocation
 import JGProgressHUD
 
-class ViewController: UIViewController {
-
-    let loadingIndicator = JGProgressHUD()
-    
-    private var userLocation: CLLocation?
-    
-    private lazy var locationManager: CLLocationManager = {
-        let locationManager = CLLocationManager()
-        return locationManager
-    }()
+class MapViewController: UIViewController {
     
     // MARK: - Subviews
     
@@ -36,7 +27,7 @@ class ViewController: UIViewController {
         button.setTitleColor(.white, for: .normal)
         button.setTitleColor(.systemGray4, for: .highlighted)
         button.layer.cornerRadius = 20
-        button.addTarget(self, action: #selector(routeToParis), for: .touchUpInside)
+        button.addTarget(self, action: #selector(createRoute), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -64,6 +55,17 @@ class ViewController: UIViewController {
         return button
     }()
     
+    private lazy var locationDeniedLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Access to Location Services is denied. Please allow access in Settings."
+        label.font = .systemFont(ofSize: 32, weight: .medium)
+        label.textColor = .systemGray4
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -74,17 +76,14 @@ class ViewController: UIViewController {
         setupSubviews()
         setupConstraints()
         
-        findUserLocation()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(didUpdateLocation), name: NSNotification.Name("did-update-location"), object: nil)
-        
-        loadingIndicator.textLabel.text = "Please wait..."
+        requestLocation()
     }
     
     // MARK: - Layout
     
     private func setupSubviews() {
         view.addSubview(mapView)
+        mapView.frame = view.bounds
         view.addSubview(removeRouteButton)
         view.addSubview(removePinsButton)
     }
@@ -93,10 +92,6 @@ class ViewController: UIViewController {
         let safeArea = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
-            mapView.topAnchor.constraint(equalTo: view.topAnchor),
-            mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             removeRouteButton.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 20),
             removeRouteButton.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20),
@@ -110,14 +105,22 @@ class ViewController: UIViewController {
         ])
     }
     
-    // MARK: - Map and Location
+    // MARK: - Location
     
-    private func findUserLocation() {
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.delegate = self
+    private func requestLocation() {
+        
+        IndicatorModel.loadingIndicator.show(in: self.view, animated: true)
+        CoreLocationManager.shared.findUserLocation()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(didUpdateLocation), name: NSNotification.Name("did-update-location"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(accessDenied), name: NSNotification.Name("access-denied"), object: nil)
     }
     
     @objc private func didUpdateLocation() {
+        
+        IndicatorModel.loadingIndicator.dismiss(animated: true)
+        
         setupMap()
         
         view.addSubview(routeButton)
@@ -131,8 +134,32 @@ class ViewController: UIViewController {
         ])
     }
     
+    @objc private func accessDenied() {
+        IndicatorModel.loadingIndicator.dismiss(animated: true)
+        mapView.isHidden = true
+        removePinsButton.isHidden = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.view.addSubview(self.locationDeniedLabel)
+            
+            let safeArea = self.view.safeAreaLayoutGuide
+            
+            NSLayoutConstraint.activate([
+                self.locationDeniedLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 20),
+                self.locationDeniedLabel.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 20),
+                self.locationDeniedLabel.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20),
+                self.locationDeniedLabel.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -20)
+            ])
+        }
+    }
+    
+    // MARK: - Map
+    
     private func setupMap() {
-        guard let initialLocation = userLocation else {
+        
+        mapView.delegate = self
+        
+        guard let initialLocation = CoreLocationManager.shared.userLocation else {
             AlertModel.shared.showAlert(title: "Attention", descr: "We can't determine your location. Please try again later", buttonText: "OK")
             return
         }
@@ -144,13 +171,12 @@ class ViewController: UIViewController {
         mapView.addAnnotations(VisitedPlaces.make())
         
         // Использование свойств класса MKMapView для конфигурации вида карты
-        mapView.mapType = .mutedStandard
+        mapView.mapType = .standard
         mapView.showsScale = true
         mapView.preferredConfiguration.elevationStyle = .realistic
         mapView.selectableMapFeatures = .pointsOfInterest
         mapView.isRotateEnabled = false
         
-        mapView.delegate = self
     }
     
     // MARK: - Route
@@ -167,10 +193,10 @@ class ViewController: UIViewController {
         directions.calculate { [unowned self] response, error in
             
             guard let unwrappedResponse = response else {
-                self.loadingIndicator.dismiss(animated: true)
+                IndicatorModel.loadingIndicator.dismiss(animated: true)
                 AlertModel.shared.showAlert(title: "Attention", descr: "This route is unavailable. Please enter another location", buttonText: "OK")
                 print(error?.localizedDescription ?? "Unknown error")
-                self.loadingIndicator.dismiss(animated: true)
+                IndicatorModel.loadingIndicator.dismiss(animated: true)
                 self.routeButton.isHidden = false
                 return
             }
@@ -178,20 +204,20 @@ class ViewController: UIViewController {
             if let route = unwrappedResponse.routes.first {
                 self.mapView.addOverlay(route.polyline)
                 self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, edgePadding: UIEdgeInsets.init(top: 80.0, left: 20.0, bottom: 100.0, right: 20.0), animated: true)
-                self.loadingIndicator.dismiss(animated: true)
+                IndicatorModel.loadingIndicator.dismiss(animated: true)
                 self.removeRouteButton.isHidden = false
             }
         }
     }
     
-    @objc private func routeToParis() {
+    @objc private func createRoute() {
         
-        loadingIndicator.show(in: self.view, animated: true)
+        IndicatorModel.loadingIndicator.show(in: self.view, animated: true)
         routeButton.isHidden = true
         
-        guard let firstLocation = userLocation?.coordinate else {
+        guard let firstLocation = CoreLocationManager.shared.userLocation?.coordinate else {
             AlertModel.shared.showAlert(title: "Error", descr: "Unable to determine your location. Please try again later", buttonText: "OK")
-            self.loadingIndicator.dismiss(animated: true)
+            IndicatorModel.loadingIndicator.dismiss(animated: true)
             routeButton.isHidden = false
             return
         }
@@ -203,7 +229,7 @@ class ViewController: UIViewController {
             
             guard let address = alert.textFields?.first?.text, !address.isEmpty else {
                 AlertModel.shared.showAlert(title: "Attention", descr: "Address could not be empty", buttonText: "OK")
-                self.loadingIndicator.dismiss(animated: true)
+                IndicatorModel.loadingIndicator.dismiss(animated: true)
                 self.routeButton.isHidden = false
                 return
             }
@@ -212,7 +238,7 @@ class ViewController: UIViewController {
                 
                 guard let secondLocation = location else {
                     AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
-                    self.loadingIndicator.dismiss(animated: true)
+                    IndicatorModel.loadingIndicator.dismiss(animated: true)
                     self.routeButton.isHidden = false
                     return
                 }
@@ -228,7 +254,7 @@ class ViewController: UIViewController {
         removeRouteButton.isHidden = true
         routeButton.isHidden = false
         
-        guard let coordinates = userLocation?.coordinate as? CLLocationCoordinate2D else {
+        guard let coordinates = CoreLocationManager.shared.userLocation?.coordinate as? CLLocationCoordinate2D else {
             AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
             return }
         mapView.setCenter(coordinates, animated: true)
@@ -236,45 +262,13 @@ class ViewController: UIViewController {
     
     @objc private func removePins() {
         mapView.removeAnnotations(mapView.annotations)
-    }
-}
-
-// MARK: - CLLocationManagerDelegate
-
-extension ViewController: CLLocationManagerDelegate {
-    
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-            
-        case .notDetermined:
-            findUserLocation()
-        case .restricted, .denied:
-            AlertModel.shared.showAlert(title: "Access denied", descr: "Please allow access to Location Services in Setting", buttonText: "OK")
-        case .authorizedAlways, .authorizedWhenInUse:
-            manager.requestLocation()
-        @unknown default:
-            fatalError()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
-        if let location = locations.first {
-            userLocation = location
-    
-            NotificationCenter.default.post(name: NSNotification.Name("did-update-location"), object: nil)
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
-        print("Error occurred: \(error.localizedDescription)")
+        removePinsButton.isEnabled = false
     }
 }
 
 // MARK: - MKMapViewDelegate Extension
 
-extension ViewController: MKMapViewDelegate {
+extension MapViewController: MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         let renderer = MKPolylineRenderer(overlay: overlay)
