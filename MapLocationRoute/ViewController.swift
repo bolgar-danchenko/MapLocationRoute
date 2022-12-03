@@ -32,7 +32,7 @@ class ViewController: UIViewController {
     private lazy var routeButton: UIButton = {
         let button = UIButton(type: .system)
         button.backgroundColor = .link
-        button.setTitle("GO TO PARIS", for: .normal)
+        button.setTitle("Create Route", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.setTitleColor(.systemGray4, for: .highlighted)
         button.layer.cornerRadius = 20
@@ -68,7 +68,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        navigationController?.navigationBar.isHidden = true
         view.backgroundColor = .systemBackground
         
         setupSubviews()
@@ -133,6 +133,7 @@ class ViewController: UIViewController {
     
     private func setupMap() {
         guard let initialLocation = userLocation else {
+            AlertModel.shared.showAlert(title: "Attention", descr: "We can't determine your location. Please try again later", buttonText: "OK")
             return
         }
         let region = MKCoordinateRegion(center: initialLocation.coordinate, latitudinalMeters: 100_000, longitudinalMeters: 100_000)
@@ -167,7 +168,10 @@ class ViewController: UIViewController {
             
             guard let unwrappedResponse = response else {
                 self.loadingIndicator.dismiss(animated: true)
+                AlertModel.shared.showAlert(title: "Attention", descr: "This route is unavailable. Please enter another location", buttonText: "OK")
                 print(error?.localizedDescription ?? "Unknown error")
+                self.loadingIndicator.dismiss(animated: true)
+                self.routeButton.isHidden = false
                 return
             }
             
@@ -181,13 +185,42 @@ class ViewController: UIViewController {
     }
     
     @objc private func routeToParis() {
+        
         loadingIndicator.show(in: self.view, animated: true)
         routeButton.isHidden = true
         
-       let londonLocation = CLLocationCoordinate2D(latitude: 51.509865, longitude: -0.118092)
-        let parisLocation = CLLocationCoordinate2D(latitude: 48.864716, longitude: 2.349014)
+        guard let firstLocation = userLocation?.coordinate else {
+            AlertModel.shared.showAlert(title: "Error", descr: "Unable to determine your location. Please try again later", buttonText: "OK")
+            self.loadingIndicator.dismiss(animated: true)
+            routeButton.isHidden = false
+            return
+        }
         
-        showRouteOnMap(pickupCoordinate: londonLocation, destinationCoordinate: parisLocation)
+        let alert = UIAlertController(title: "Where to go?", message: "", preferredStyle: .alert)
+        alert.addTextField()
+        alert.textFields?.first?.placeholder = "City or location"
+        alert.addAction(UIAlertAction(title: "Let's go!", style: .default) { _ in
+            
+            guard let address = alert.textFields?.first?.text, !address.isEmpty else {
+                AlertModel.shared.showAlert(title: "Attention", descr: "Address could not be empty", buttonText: "OK")
+                self.loadingIndicator.dismiss(animated: true)
+                self.routeButton.isHidden = false
+                return
+            }
+            
+            CoreLocationManager.shared.getLocation(from: address) { location in
+                
+                guard let secondLocation = location else {
+                    AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
+                    self.loadingIndicator.dismiss(animated: true)
+                    self.routeButton.isHidden = false
+                    return
+                }
+        
+                self.showRouteOnMap(pickupCoordinate: firstLocation, destinationCoordinate: secondLocation)
+            }
+        })
+        self.present(alert, animated: true)
     }
     
     @objc private func removeRoute() {
@@ -195,7 +228,9 @@ class ViewController: UIViewController {
         removeRouteButton.isHidden = true
         routeButton.isHidden = false
         
-        guard let coordinates = userLocation?.coordinate as? CLLocationCoordinate2D else { return }
+        guard let coordinates = userLocation?.coordinate as? CLLocationCoordinate2D else {
+            AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
+            return }
         mapView.setCenter(coordinates, animated: true)
     }
     
@@ -214,7 +249,7 @@ extension ViewController: CLLocationManagerDelegate {
         case .notDetermined:
             findUserLocation()
         case .restricted, .denied:
-            print("Location is forbidden")
+            AlertModel.shared.showAlert(title: "Access denied", descr: "Please allow access to Location Services in Setting", buttonText: "OK")
         case .authorizedAlways, .authorizedWhenInUse:
             manager.requestLocation()
         @unknown default:
@@ -232,6 +267,7 @@ extension ViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
         print("Error occurred: \(error.localizedDescription)")
     }
 }
