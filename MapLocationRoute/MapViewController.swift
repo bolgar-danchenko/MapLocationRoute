@@ -80,6 +80,8 @@ class MapViewController: UIViewController {
         
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
         self.view.addGestureRecognizer(longPressRecognizer)
+        
+        mapView.delegate = self
     }
     
     // MARK: - Layout
@@ -160,8 +162,6 @@ class MapViewController: UIViewController {
     
     private func setupMap() {
         
-        mapView.delegate = self
-        
         guard let initialLocation = CoreLocationManager.shared.userLocation else {
             AlertModel.shared.showAlert(title: "Attention", descr: "We can't determine your location. Please try again later", buttonText: "OK")
             return
@@ -171,7 +171,8 @@ class MapViewController: UIViewController {
         mapView.setCenter(initialLocation.coordinate, animated: true)
         mapView.setRegion(region, animated: false)
         
-        mapView.addAnnotations(VisitedPlaces.make())
+//        mapView.addAnnotations(VisitedPlaces.make())
+        addPinsFromArray()
         
         // Использование свойств класса MKMapView для конфигурации вида карты
         mapView.mapType = .standard
@@ -179,6 +180,17 @@ class MapViewController: UIViewController {
         mapView.preferredConfiguration.elevationStyle = .realistic
         mapView.selectableMapFeatures = .pointsOfInterest
         mapView.isRotateEnabled = false
+    }
+    
+    func addPinsFromArray() {
+        let pinArray = VisitedPlaces.make()
+        for customPin in pinArray {
+            let pin = MKPointAnnotation()
+            pin.coordinate = customPin.coordinate
+            pin.title = customPin.title
+            pin.subtitle = customPin.info
+            mapView.addAnnotation(pin)
+        }
     }
     
     @objc private func longPressed(sender: UILongPressGestureRecognizer) {
@@ -300,5 +312,22 @@ extension MapViewController: MKMapViewDelegate {
         renderer.strokeColor = UIColor.link
         renderer.lineWidth = 5.0
         return renderer
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        guard !(annotation is MKUserLocation) else {
+            return nil
+        }
+        
+        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "custom")
+        
+        if annotationView == nil {
+            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: "custom")
+            annotationView?.canShowCallout = true
+        } else {
+            annotationView?.annotation = annotation
+        }
+        annotationView?.image = UIImage(systemName: "flag.fill")
+        return annotationView
     }
 }
