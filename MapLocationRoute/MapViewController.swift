@@ -77,6 +77,9 @@ class MapViewController: UIViewController {
         setupConstraints()
         
         requestLocation()
+        
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
+        self.view.addGestureRecognizer(longPressRecognizer)
     }
     
     // MARK: - Layout
@@ -176,7 +179,30 @@ class MapViewController: UIViewController {
         mapView.preferredConfiguration.elevationStyle = .realistic
         mapView.selectableMapFeatures = .pointsOfInterest
         mapView.isRotateEnabled = false
+    }
+    
+    @objc private func longPressed(sender: UILongPressGestureRecognizer) {
+        let touchPoint = sender.location(in: mapView)
+        let newCoordinates = mapView.convert(touchPoint, toCoordinateFrom: mapView)
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = newCoordinates
         
+        let alert = UIAlertController(title: "Add Pin", message: "Enter title", preferredStyle: .alert)
+        alert.addTextField() { newTextField in
+            newTextField.placeholder = "My favourite place"
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            if let textFields = alert.textFields,
+               let tf = textFields.first,
+               let title = tf.text {
+                annotation.title = title
+                self.mapView.addAnnotation(annotation)
+            } else {
+                AlertModel.shared.showAlert(title: "Error", descr: "Unable to add annotation", buttonText: "OK")
+            }
+        })
+        navigationController?.present(alert, animated: true)
     }
     
     // MARK: - Route
@@ -262,7 +288,6 @@ class MapViewController: UIViewController {
     
     @objc private func removePins() {
         mapView.removeAnnotations(mapView.annotations)
-        removePinsButton.isEnabled = false
     }
 }
 
