@@ -13,6 +13,8 @@ class CoreLocationManager: NSObject {
     
     static let shared = CoreLocationManager()
     
+    let allStrings = AllStrings()
+    
     var userLocation: CLLocation?
     
     private lazy var locationManager: CLLocationManager = {
@@ -35,6 +37,15 @@ class CoreLocationManager: NSObject {
             }
             completion(location)
         }
+    }
+    
+    func getDistance(route: MKRoute) -> String {
+        
+        let distance = Int(route.distance/1000)
+        let localizedString = NSLocalizedString("routeDistance", comment: "")
+        let formattedString = String(format: localizedString, distance)
+        
+        return formattedString
     }
 }
 
@@ -64,7 +75,7 @@ extension CoreLocationManager: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
+        AlertModel.shared.showAlert(title: allStrings.errorAlertTitle, descr: allStrings.locationErrorDescr, buttonText: allStrings.okButtonLabel)
         IndicatorModel.loadingIndicator.dismiss(animated: true)
         print("Error occurred: \(error.localizedDescription)")
     }

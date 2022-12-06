@@ -12,6 +12,8 @@ import JGProgressHUD
 
 class MapViewController: UIViewController {
     
+    let allStrings = AllStrings()
+    
     // MARK: - Subviews
     
     private lazy var mapView: MKMapView = {
@@ -20,24 +22,26 @@ class MapViewController: UIViewController {
         return mapView
     }()
     
-    private lazy var routeButton: UIButton = {
-        let button = UIButton(type: .system)
+    private lazy var routeButton: AdaptableSizeButton = {
+        let button = AdaptableSizeButton()
         button.backgroundColor = .link
-        button.setTitle("Create Route", for: .normal)
+        button.setTitle(allStrings.createRouteButtonTittle, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.setTitleColor(.systemGray4, for: .highlighted)
+        button.titleLabel?.textAlignment = .center
         button.layer.cornerRadius = 20
         button.addTarget(self, action: #selector(createRoute), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    private lazy var removeRouteButton: UIButton = {
-        let button = UIButton(type: .system)
+    private lazy var removeRouteButton: AdaptableSizeButton = {
+        let button = AdaptableSizeButton()
         button.backgroundColor = .systemRed
-        button.setTitle("Remove Route", for: .normal)
+        button.setTitle(allStrings.removeRouteButtonTittle, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.setTitleColor(.systemGray4, for: .highlighted)
+        button.titleLabel?.textAlignment = .center
         button.layer.cornerRadius = 20
         button.addTarget(self, action: #selector(removeRoute), for: .touchUpInside)
         button.isHidden = true
@@ -57,11 +61,24 @@ class MapViewController: UIViewController {
     
     private lazy var locationDeniedLabel: UILabel = {
         let label = UILabel()
-        label.text = "Access to Location Services is denied. Please allow access in Settings."
+        label.text = allStrings.locationDeniedDescr
         label.font = .systemFont(ofSize: 32, weight: .medium)
         label.textColor = .systemGray4
         label.numberOfLines = 0
         label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var distanceLabel: UILabel = {
+        let label = UILabel()
+        label.text = ""
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.textColor = .white
+        label.textAlignment = .right
+        label.backgroundColor = .systemGray
+        label.sizeToFit()
+        label.isHidden = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -91,6 +108,7 @@ class MapViewController: UIViewController {
         mapView.frame = view.bounds
         view.addSubview(removeRouteButton)
         view.addSubview(removePinsButton)
+        view.addSubview(distanceLabel)
     }
     
     private func setupConstraints() {
@@ -101,12 +119,14 @@ class MapViewController: UIViewController {
             removeRouteButton.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 20),
             removeRouteButton.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20),
             removeRouteButton.heightAnchor.constraint(equalToConstant: 40),
-            removeRouteButton.widthAnchor.constraint(equalToConstant: 120),
             
             removePinsButton.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 20),
             removePinsButton.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 20),
             removePinsButton.heightAnchor.constraint(equalToConstant: 40),
-            removePinsButton.widthAnchor.constraint(equalToConstant: 40)
+            removePinsButton.widthAnchor.constraint(equalToConstant: 40),
+            
+            distanceLabel.topAnchor.constraint(equalTo: removeRouteButton.bottomAnchor, constant: 10),
+            distanceLabel.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20),
         ])
     }
     
@@ -134,8 +154,7 @@ class MapViewController: UIViewController {
         NSLayoutConstraint.activate([
             routeButton.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 20),
             routeButton.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20),
-            routeButton.heightAnchor.constraint(equalToConstant: 40),
-            routeButton.widthAnchor.constraint(equalToConstant: 120)
+            routeButton.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
     
@@ -163,7 +182,7 @@ class MapViewController: UIViewController {
     private func setupMap() {
         
         guard let initialLocation = CoreLocationManager.shared.userLocation else {
-            AlertModel.shared.showAlert(title: "Attention", descr: "We can't determine your location. Please try again later", buttonText: "OK")
+            AlertModel.shared.showAlert(title: allStrings.errorAlertTitle, descr: allStrings.locationErrorDescr, buttonText: allStrings.okButtonLabel)
             return
         }
         let region = MKCoordinateRegion(center: initialLocation.coordinate, latitudinalMeters: 100_000, longitudinalMeters: 100_000)
@@ -182,8 +201,10 @@ class MapViewController: UIViewController {
         mapView.isRotateEnabled = false
     }
     
+    // MARK: - Pins
+    
     func addPinsFromArray() {
-        let pinArray = VisitedPlaces.make()
+        let pinArray = VisitedPlaces.shared.make()
         for customPin in pinArray {
             let pin = MKPointAnnotation()
             pin.coordinate = customPin.coordinate
@@ -199,22 +220,26 @@ class MapViewController: UIViewController {
         let annotation = MKPointAnnotation()
         annotation.coordinate = newCoordinates
         
-        let alert = UIAlertController(title: "Add Pin", message: "Enter title", preferredStyle: .alert)
+        let alert = UIAlertController(title: allStrings.addPinTitle, message: allStrings.addPinDescr, preferredStyle: .alert)
         alert.addTextField() { newTextField in
-            newTextField.placeholder = "My favourite place"
+            newTextField.placeholder = self.allStrings.addPinPlaceholder
         }
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+        alert.addAction(UIAlertAction(title: allStrings.cancelButtonLabel, style: .cancel))
+        alert.addAction(UIAlertAction(title: allStrings.okButtonLabel, style: .default) { _ in
             if let textFields = alert.textFields,
                let tf = textFields.first,
                let title = tf.text {
                 annotation.title = title
                 self.mapView.addAnnotation(annotation)
             } else {
-                AlertModel.shared.showAlert(title: "Error", descr: "Unable to add annotation", buttonText: "OK")
+                AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.pinAddingErrorDescr, buttonText: self.allStrings.okButtonLabel)
             }
         })
         navigationController?.present(alert, animated: true)
+    }
+    
+    @objc private func removePins() {
+        mapView.removeAnnotations(mapView.annotations)
     }
     
     // MARK: - Route
@@ -232,7 +257,7 @@ class MapViewController: UIViewController {
             
             guard let unwrappedResponse = response else {
                 IndicatorModel.loadingIndicator.dismiss(animated: true)
-                AlertModel.shared.showAlert(title: "Attention", descr: "This route is unavailable. Please enter another location", buttonText: "OK")
+                AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.routeUnavailableDescr, buttonText: self.allStrings.okButtonLabel)
                 print(error?.localizedDescription ?? "Unknown error")
                 IndicatorModel.loadingIndicator.dismiss(animated: true)
                 self.routeButton.isHidden = false
@@ -240,10 +265,15 @@ class MapViewController: UIViewController {
             }
             
             if let route = unwrappedResponse.routes.first {
-                self.mapView.addOverlay(route.polyline)
-                self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, edgePadding: UIEdgeInsets.init(top: 80.0, left: 20.0, bottom: 100.0, right: 20.0), animated: true)
-                IndicatorModel.loadingIndicator.dismiss(animated: true)
-                self.removeRouteButton.isHidden = false
+                DispatchQueue.main.async {
+                    self.mapView.addOverlay(route.polyline)
+                    self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, edgePadding: UIEdgeInsets.init(top: 80.0, left: 20.0, bottom: 100.0, right: 20.0), animated: true)
+                    IndicatorModel.loadingIndicator.dismiss(animated: true)
+                    self.removeRouteButton.isHidden = false
+                    
+                    self.distanceLabel.text = CoreLocationManager.shared.getDistance(route: route)
+                    self.distanceLabel.isHidden = false
+                }
             }
         }
     }
@@ -254,19 +284,19 @@ class MapViewController: UIViewController {
         routeButton.isHidden = true
         
         guard let firstLocation = CoreLocationManager.shared.userLocation?.coordinate else {
-            AlertModel.shared.showAlert(title: "Error", descr: "Unable to determine your location. Please try again later", buttonText: "OK")
+            AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.locationErrorDescr, buttonText: self.allStrings.okButtonLabel)
             IndicatorModel.loadingIndicator.dismiss(animated: true)
             routeButton.isHidden = false
             return
         }
         
-        let alert = UIAlertController(title: "Where to go?", message: "", preferredStyle: .alert)
+        let alert = UIAlertController(title: allStrings.routeAlertTitle, message: "", preferredStyle: .alert)
         alert.addTextField()
-        alert.textFields?.first?.placeholder = "City or location"
-        alert.addAction(UIAlertAction(title: "Let's go!", style: .default) { _ in
+        alert.textFields?.first?.placeholder = allStrings.routeAlertPlaceholder
+        alert.addAction(UIAlertAction(title: allStrings.routeAlertOkButton, style: .default) { _ in
             
             guard let address = alert.textFields?.first?.text, !address.isEmpty else {
-                AlertModel.shared.showAlert(title: "Attention", descr: "Address could not be empty", buttonText: "OK")
+                AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.emptyLocationText, buttonText: self.allStrings.okButtonLabel)
                 IndicatorModel.loadingIndicator.dismiss(animated: true)
                 self.routeButton.isHidden = false
                 return
@@ -275,7 +305,7 @@ class MapViewController: UIViewController {
             CoreLocationManager.shared.getLocation(from: address) { location in
                 
                 guard let secondLocation = location else {
-                    AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
+                    AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.locationErrorDescr, buttonText: self.allStrings.okButtonLabel)
                     IndicatorModel.loadingIndicator.dismiss(animated: true)
                     self.routeButton.isHidden = false
                     return
@@ -291,15 +321,13 @@ class MapViewController: UIViewController {
         mapView.removeOverlays(mapView.overlays)
         removeRouteButton.isHidden = true
         routeButton.isHidden = false
+        distanceLabel.text = ""
+        distanceLabel.isHidden = true
         
         guard let coordinates = CoreLocationManager.shared.userLocation?.coordinate as? CLLocationCoordinate2D else {
-            AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
+            AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.locationErrorDescr, buttonText: self.allStrings.okButtonLabel)
             return }
         mapView.setCenter(coordinates, animated: true)
-    }
-    
-    @objc private func removePins() {
-        mapView.removeAnnotations(mapView.annotations)
     }
 }
 

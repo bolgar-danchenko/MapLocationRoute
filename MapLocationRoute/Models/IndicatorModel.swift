@@ -12,7 +12,7 @@ class IndicatorModel {
     
     static let loadingIndicator: JGProgressHUD = {
         let indicator = JGProgressHUD()
-        indicator.textLabel.text = "Please wait..."
+        indicator.textLabel.text = AllStrings.shared.loadingIndicatorLabel
         return indicator
     }()
 
