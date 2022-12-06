@@ -47,6 +47,31 @@ class CoreLocationManager: NSObject {
         
         return formattedString
     }
+    
+    func showRouteOnMap(pickupCoordinate: CLLocationCoordinate2D, destinationCoordinate: CLLocationCoordinate2D, completion: @escaping (_ route: MKRoute?) -> Void) {
+        
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: pickupCoordinate, addressDictionary: nil))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destinationCoordinate, addressDictionary: nil))
+        request.requestsAlternateRoutes = true
+        request.transportType = .automobile
+        
+        let directions = MKDirections(request: request)
+        directions.calculate { response, error in
+            
+            guard let unwrappedResponse = response else {
+                print(error?.localizedDescription ?? "Unknown error")
+                completion(nil)
+                return
+            }
+            
+            guard let route = unwrappedResponse.routes.first else {
+                completion(nil)
+                return
+            }
+            completion(route)
+        }
+    }
 }
 
 extension CoreLocationManager: CLLocationManagerDelegate {

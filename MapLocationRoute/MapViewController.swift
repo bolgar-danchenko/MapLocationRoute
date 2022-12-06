@@ -244,40 +244,6 @@ class MapViewController: UIViewController {
     
     // MARK: - Route
     
-    func showRouteOnMap(pickupCoordinate: CLLocationCoordinate2D, destinationCoordinate: CLLocationCoordinate2D) {
-        
-        let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: pickupCoordinate, addressDictionary: nil))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destinationCoordinate, addressDictionary: nil))
-        request.requestsAlternateRoutes = true
-        request.transportType = .automobile
-        
-        let directions = MKDirections(request: request)
-        directions.calculate { [unowned self] response, error in
-            
-            guard let unwrappedResponse = response else {
-                IndicatorModel.loadingIndicator.dismiss(animated: true)
-                AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.routeUnavailableDescr, buttonText: self.allStrings.okButtonLabel)
-                print(error?.localizedDescription ?? "Unknown error")
-                IndicatorModel.loadingIndicator.dismiss(animated: true)
-                self.routeButton.isHidden = false
-                return
-            }
-            
-            if let route = unwrappedResponse.routes.first {
-                DispatchQueue.main.async {
-                    self.mapView.addOverlay(route.polyline)
-                    self.mapView.setVisibleMapRect(route.polyline.boundingMapRect, edgePadding: UIEdgeInsets.init(top: 80.0, left: 20.0, bottom: 100.0, right: 20.0), animated: true)
-                    IndicatorModel.loadingIndicator.dismiss(animated: true)
-                    self.removeRouteButton.isHidden = false
-                    
-                    self.distanceLabel.text = CoreLocationManager.shared.getDistance(route: route)
-                    self.distanceLabel.isHidden = false
-                }
-            }
-        }
-    }
-    
     @objc private func createRoute() {
         
         IndicatorModel.loadingIndicator.show(in: self.view, animated: true)
@@ -305,13 +271,31 @@ class MapViewController: UIViewController {
             CoreLocationManager.shared.getLocation(from: address) { location in
                 
                 guard let secondLocation = location else {
-                    AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.locationErrorDescr, buttonText: self.allStrings.okButtonLabel)
+                    AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.routeUnavailableDescr, buttonText: self.allStrings.okButtonLabel)
                     IndicatorModel.loadingIndicator.dismiss(animated: true)
                     self.routeButton.isHidden = false
                     return
                 }
         
-                self.showRouteOnMap(pickupCoordinate: firstLocation, destinationCoordinate: secondLocation)
+                CoreLocationManager.shared.showRouteOnMap(pickupCoordinate: firstLocation, destinationCoordinate: secondLocation) { route in
+                    
+                    if let newRoute = route {
+                        
+                        DispatchQueue.main.async {
+                            self.mapView.addOverlay(newRoute.polyline)
+                            self.mapView.setVisibleMapRect(newRoute.polyline.boundingMapRect, edgePadding: UIEdgeInsets.init(top: 80.0, left: 20.0, bottom: 100.0, right: 20.0), animated: true)
+                            IndicatorModel.loadingIndicator.dismiss(animated: true)
+                            self.removeRouteButton.isHidden = false
+                            
+                            self.distanceLabel.text = CoreLocationManager.shared.getDistance(route: newRoute)
+                            self.distanceLabel.isHidden = false
+                        }
+                    } else {
+                        AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.routeUnavailableDescr, buttonText: self.allStrings.okButtonLabel)
+                        IndicatorModel.loadingIndicator.dismiss(animated: true)
+                        self.routeButton.isHidden = false
+                    }
+                }
             }
         })
         self.present(alert, animated: true)
