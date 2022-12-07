@@ -56,7 +56,7 @@
 "ok" = "OK";
 
 /* Loading indicator label */
-"pleaseWait" = "Bitte warte...";
+"pleaseWait" = "Bitte warten...";
 
 /* Remove Route button */
 "removeRoute" = "Route entfernen";

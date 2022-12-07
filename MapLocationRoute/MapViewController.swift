@@ -12,8 +12,6 @@ import JGProgressHUD
 
 class MapViewController: UIViewController {
     
-    let allStrings = AllStrings()
-    
     // MARK: - Subviews
     
     private lazy var mapView: MKMapView = {
@@ -25,7 +23,7 @@ class MapViewController: UIViewController {
     private lazy var routeButton: AdaptableSizeButton = {
         let button = AdaptableSizeButton()
         button.backgroundColor = .link
-        button.setTitle(allStrings.createRouteButtonTittle, for: .normal)
+        button.setTitle("createRoute".localized, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.setTitleColor(.systemGray4, for: .highlighted)
         button.titleLabel?.textAlignment = .center
@@ -38,7 +36,7 @@ class MapViewController: UIViewController {
     private lazy var removeRouteButton: AdaptableSizeButton = {
         let button = AdaptableSizeButton()
         button.backgroundColor = .systemRed
-        button.setTitle(allStrings.removeRouteButtonTittle, for: .normal)
+        button.setTitle("removeRoute".localized, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.setTitleColor(.systemGray4, for: .highlighted)
         button.titleLabel?.textAlignment = .center
@@ -61,7 +59,7 @@ class MapViewController: UIViewController {
     
     private lazy var locationDeniedLabel: UILabel = {
         let label = UILabel()
-        label.text = allStrings.locationDeniedDescr
+        label.text = "locationDenied".localized
         label.font = .systemFont(ofSize: 32, weight: .medium)
         label.textColor = .systemGray4
         label.numberOfLines = 0
@@ -182,7 +180,9 @@ class MapViewController: UIViewController {
     private func setupMap() {
         
         guard let initialLocation = CoreLocationManager.shared.userLocation else {
-            AlertModel.shared.showAlert(title: allStrings.errorAlertTitle, descr: allStrings.locationErrorDescr, buttonText: allStrings.okButtonLabel)
+            AlertModel.shared.showAlert(title: "attention".localized,
+                                        descr: "locationErrorDescr".localized,
+                                        buttonText: "ok".localized)
             return
         }
         let region = MKCoordinateRegion(center: initialLocation.coordinate, latitudinalMeters: 100_000, longitudinalMeters: 100_000)
@@ -220,19 +220,23 @@ class MapViewController: UIViewController {
         let annotation = MKPointAnnotation()
         annotation.coordinate = newCoordinates
         
-        let alert = UIAlertController(title: allStrings.addPinTitle, message: allStrings.addPinDescr, preferredStyle: .alert)
+        let alert = UIAlertController(title: "addPin".localized,
+                                      message: "enterTitle".localized,
+                                      preferredStyle: .alert)
         alert.addTextField() { newTextField in
-            newTextField.placeholder = self.allStrings.addPinPlaceholder
+            newTextField.placeholder = "addPinPlaceholder".localized
         }
-        alert.addAction(UIAlertAction(title: allStrings.cancelButtonLabel, style: .cancel))
-        alert.addAction(UIAlertAction(title: allStrings.okButtonLabel, style: .default) { _ in
+        alert.addAction(UIAlertAction(title: "cancel".localized, style: .cancel))
+        alert.addAction(UIAlertAction(title: "ok".localized, style: .default) { _ in
             if let textFields = alert.textFields,
                let tf = textFields.first,
                let title = tf.text {
                 annotation.title = title
                 self.mapView.addAnnotation(annotation)
             } else {
-                AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.pinAddingErrorDescr, buttonText: self.allStrings.okButtonLabel)
+                AlertModel.shared.showAlert(title: "attention".localized,
+                                            descr: "unableToAddAnnotation".localized,
+                                            buttonText: "ok".localized)
             }
         })
         navigationController?.present(alert, animated: true)
@@ -250,19 +254,25 @@ class MapViewController: UIViewController {
         routeButton.isHidden = true
         
         guard let firstLocation = CoreLocationManager.shared.userLocation?.coordinate else {
-            AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.locationErrorDescr, buttonText: self.allStrings.okButtonLabel)
+            AlertModel.shared.showAlert(title: "attention".localized,
+                                        descr: "locationErrorDescr".localized,
+                                        buttonText: "ok".localized)
             IndicatorModel.loadingIndicator.dismiss(animated: true)
             routeButton.isHidden = false
             return
         }
         
-        let alert = UIAlertController(title: allStrings.routeAlertTitle, message: "", preferredStyle: .alert)
+        let alert = UIAlertController(title: "whereToGo".localized,
+                                      message: "",
+                                      preferredStyle: .alert)
         alert.addTextField()
-        alert.textFields?.first?.placeholder = allStrings.routeAlertPlaceholder
-        alert.addAction(UIAlertAction(title: allStrings.routeAlertOkButton, style: .default) { _ in
+        alert.textFields?.first?.placeholder = "cityOrLocation".localized
+        alert.addAction(UIAlertAction(title: "letsGo".localized, style: .default) { _ in
             
             guard let address = alert.textFields?.first?.text, !address.isEmpty else {
-                AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.emptyLocationText, buttonText: self.allStrings.okButtonLabel)
+                AlertModel.shared.showAlert(title: "attention".localized,
+                                            descr: "addressCantBeAmpty".localized,
+                                            buttonText: "ok".localized)
                 IndicatorModel.loadingIndicator.dismiss(animated: true)
                 self.routeButton.isHidden = false
                 return
@@ -271,7 +281,9 @@ class MapViewController: UIViewController {
             CoreLocationManager.shared.getLocation(from: address) { location in
                 
                 guard let secondLocation = location else {
-                    AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.routeUnavailableDescr, buttonText: self.allStrings.okButtonLabel)
+                    AlertModel.shared.showAlert(title: "attention".localized,
+                                                descr: "routeUnavailable".localized,
+                                                buttonText: "ok".localized)
                     IndicatorModel.loadingIndicator.dismiss(animated: true)
                     self.routeButton.isHidden = false
                     return
@@ -291,7 +303,9 @@ class MapViewController: UIViewController {
                             self.distanceLabel.isHidden = false
                         }
                     } else {
-                        AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.routeUnavailableDescr, buttonText: self.allStrings.okButtonLabel)
+                        AlertModel.shared.showAlert(title: "attention".localized,
+                                                    descr: "routeUnavailable".localized,
+                                                    buttonText: "ok".localized)
                         IndicatorModel.loadingIndicator.dismiss(animated: true)
                         self.routeButton.isHidden = false
                     }
@@ -309,8 +323,11 @@ class MapViewController: UIViewController {
         distanceLabel.isHidden = true
         
         guard let coordinates = CoreLocationManager.shared.userLocation?.coordinate as? CLLocationCoordinate2D else {
-            AlertModel.shared.showAlert(title: self.allStrings.errorAlertTitle, descr: self.allStrings.locationErrorDescr, buttonText: self.allStrings.okButtonLabel)
-            return }
+            AlertModel.shared.showAlert(title: "attention".localized,
+                                        descr: "locationErrorDescr".localized,
+                                        buttonText: "ok".localized)
+            return
+        }
         mapView.setCenter(coordinates, animated: true)
     }
 }

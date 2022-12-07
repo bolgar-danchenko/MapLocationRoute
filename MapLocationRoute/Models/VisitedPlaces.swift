@@ -12,8 +12,6 @@ class VisitedPlaces: NSObject, MKAnnotation {
     
     static let shared = VisitedPlaces(title: "", coordinate: CLLocationCoordinate2D(), info: "")
     
-    let allStrings = AllStrings()
-    
     var title: String?
     var coordinate: CLLocationCoordinate2D
     var info: String
@@ -31,11 +29,25 @@ extension VisitedPlaces {
     
     func make() -> [VisitedPlaces] {
         return [
-            .init(title: allStrings.florenceTitle, coordinate: CLLocationCoordinate2D(latitude: 43.769562, longitude: 11.255814), info: allStrings.florenceInfo),
-            .init(title: allStrings.romeTitle, coordinate: CLLocationCoordinate2D(latitude: 41.902782, longitude: 12.496366), info: allStrings.romeInfo),
-            .init(title: allStrings.berlinTitle, coordinate: CLLocationCoordinate2D(latitude: 52.520008, longitude: 13.404954), info: allStrings.berlinInfo),
-            .init(title: allStrings.luxembourgTitle, coordinate: CLLocationCoordinate2D(latitude: 49.611622, longitude: 6.131935), info: allStrings.luxembourgInfo),
-            .init(title: allStrings.zurichTitle, coordinate: CLLocationCoordinate2D(latitude: 47.373878, longitude: 8.545094), info: allStrings.zurichInfo),
+            .init(title: "florence".localized,
+                  coordinate: CLLocationCoordinate2D(latitude: 43.769562, longitude: 11.255814),
+                  info: "leapOfFaith".localized),
+            
+            .init(title: "rome".localized,
+                  coordinate: CLLocationCoordinate2D(latitude: 41.902782, longitude: 12.496366),
+                  info: "goodPasta".localized),
+            
+            .init(title: "berlin".localized,
+                  coordinate: CLLocationCoordinate2D(latitude: 52.520008, longitude: 13.404954),
+                  info: "ichBinEinBerliner".localized),
+            
+            .init(title: "luxembourg".localized,
+                  coordinate: CLLocationCoordinate2D(latitude: 49.611622, longitude: 6.131935),
+                  info: "veryNiceCity".localized),
+            
+            .init(title: "zurich".localized,
+                  coordinate: CLLocationCoordinate2D(latitude: 47.373878, longitude: 8.545094),
+                  info: "flamingosWalkingAround".localized),
         ]
     }
 }

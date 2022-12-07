@@ -13,8 +13,6 @@ class CoreLocationManager: NSObject {
     
     static let shared = CoreLocationManager()
     
-    let allStrings = AllStrings()
-    
     var userLocation: CLLocation?
     
     private lazy var locationManager: CLLocationManager = {
@@ -100,7 +98,9 @@ extension CoreLocationManager: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        AlertModel.shared.showAlert(title: allStrings.errorAlertTitle, descr: allStrings.locationErrorDescr, buttonText: allStrings.okButtonLabel)
+        AlertModel.shared.showAlert(title: "attention".localized,
+                                    descr: "locationErrorDescr".localized,
+                                    buttonText: "ok".localized)
         IndicatorModel.loadingIndicator.dismiss(animated: true)
         print("Error occurred: \(error.localizedDescription)")
     }
