@@ -103,7 +103,6 @@ class MapViewController: UIViewController {
     
     private func setupSubviews() {
         view.addSubview(mapView)
-        mapView.frame = view.bounds
         view.addSubview(removeRouteButton)
         view.addSubview(removePinsButton)
         view.addSubview(distanceLabel)
@@ -113,6 +112,11 @@ class MapViewController: UIViewController {
         let safeArea = view.safeAreaLayoutGuide
         
         NSLayoutConstraint.activate([
+            
+            mapView.topAnchor.constraint(equalTo: view.topAnchor),
+            mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             removeRouteButton.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 20),
             removeRouteButton.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -20),
