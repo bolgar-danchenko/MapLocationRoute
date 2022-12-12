@@ -1,0 +1,81 @@
+/* Add pin alert title */
+"addPin" = "Добавить метку";
+
+/* Add pin alert placeholder */
+"addPinPlaceholder" = "Ваше место";
+
+/* Error message when textfield is empty */
+"addressCantBeAmpty" = "Адрес не может быть пустым";
+
+/* Error alert title */
+"attention" = "Внимание";
+
+/* Berlin city name */
+"berlin" = "Берлин";
+
+/* Cancel alert action */
+"cancel" = "Отмена";
+
+/* Create route alert placeholder */
+"cityOrLocation" = "Город или местность";
+
+/* Create Route button */
+"createRoute" = "Проложить маршрут";
+
+/* Add pin alert message */
+"enterTitle" = "Введите название";
+
+/* Zurich city info */
+"flamingosWalkingAround" = "Фламинго гуляют сами по себе";
+
+/* Florence city name */
+"florence" = "Флоренция";
+
+/* Rome city info */
+"goodPasta" = "Вкусная паста";
+
+/* Berlin city info */
+"ichBinEinBerliner" = "Ich bin ein Berliner";
+
+/* Florence city info */
+"leapOfFaith" = "Прыжок веры";
+
+/* Create route alert ok action */
+"letsGo" = "Поехали!";
+
+/* Label on the main screen if access is denied */
+"locationDenied" = "Отсутствует доступ к геолокации. Пожалуйста, разрешите доступ в Настройках";
+
+/* Location error alert description */
+"locationErrorDescr" = "Мы не можем определить ваше местоположение. Пожалуйста, попробуйте позже";
+
+/* Luxembourg city name */
+"luxembourg" = "Люксембург";
+
+/* OK alert action */
+"ok" = "ОК";
+
+/* Loading indicator label */
+"pleaseWait" = "Пожалуйста, подождите...";
+
+/* Remove Route button */
+"removeRoute" = "Удалить маршрут";
+
+/* Rome city name */
+"rome" = "Рим";
+
+/* Route unavailable alert description */
+"routeUnavailable" = "Этот маршрут недоступен. Пожалуйста, укажите другое место";
+
+/* Error while adding annotation description */
+"unableToAddAnnotation" = "Невозможно добавить метку. Пожалуйста, попробуйте позже";
+
+/* Luxembourg city info */
+"veryNiceCity" = "Очень красивый город";
+
+/* Create route alert title */
+"whereToGo" = "Куда поедем?";
+
+/* Zurich city name */
+"zurich" = "Цюрих";
+

@@ -1,0 +1,81 @@
+/* Add pin alert title */
+"addPin" = "Nadel hinzufügen";
+
+/* Add pin alert placeholder */
+"addPinPlaceholder" = "Dein Lieblingsort";
+
+/* Error message when textfield is empty */
+"addressCantBeAmpty" = "Die Adresse kann nicht leer sein";
+
+/* Error alert title */
+"attention" = "Achtung";
+
+/* Berlin city name */
+"berlin" = "Berlin";
+
+/* Cancel alert action */
+"cancel" = "Abbrechen";
+
+/* Create route alert placeholder */
+"cityOrLocation" = "Stadt oder Ort";
+
+/* Create Route button */
+"createRoute" = "Route Erstellen";
+
+/* Add pin alert message */
+"enterTitle" = "Titel eingegen";
+
+/* Zurich city info */
+"flamingosWalkingAround" = "Flamingos gehen herum";
+
+/* Florence city name */
+"florence" = "Firenze";
+
+/* Rome city info */
+"goodPasta" = "Gute Pasta";
+
+/* Berlin city info */
+"ichBinEinBerliner" = "Ich bin ein Berliner";
+
+/* Florence city info */
+"leapOfFaith" = "Vertrauensvorschuss";
+
+/* Create route alert ok action */
+"letsGo" = "Gehen wir!";
+
+/* Label on the main screen if access is denied */
+"locationDenied" = "Der Zugriff auf die Ortungsdienste ist verweigert. Bitte erlaube den Zugriff in Einstellungen";
+
+/* Location error alert description */
+"locationErrorDescr" = "Wir können deinen Standort nicht bestimmen. Bitte versuche es später nochmals";
+
+/* Luxembourg city name */
+"luxembourg" = "Luxemburg";
+
+/* OK alert action */
+"ok" = "OK";
+
+/* Loading indicator label */
+"pleaseWait" = "Bitte warten...";
+
+/* Remove Route button */
+"removeRoute" = "Route entfernen";
+
+/* Rome city name */
+"rome" = "Rom";
+
+/* Route unavailable alert description */
+"routeUnavailable" = "Diese Route ist nicht verfügbar. Bitte gib einen anderen Ort ein";
+
+/* Error while adding annotation description */
+"unableToAddAnnotation" = "Deine Anmerkung kann derzeit nicht gespeichert werden. Bitte versuche es später nochmals";
+
+/* Luxembourg city info */
+"veryNiceCity" = "Eine sehr schöne Stadt";
+
+/* Create route alert title */
+"whereToGo" = "Wohin fahren wir?";
+
+/* Zurich city name */
+"zurich" = "Zürich";
+

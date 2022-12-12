@@ -36,6 +36,40 @@ class CoreLocationManager: NSObject {
             completion(location)
         }
     }
+    
+    func getDistance(route: MKRoute) -> String {
+        
+        let distance = Int(route.distance/1000)
+        let localizedString = NSLocalizedString("routeDistance", comment: "")
+        let formattedString = String(format: localizedString, distance)
+        
+        return formattedString
+    }
+    
+    func showRouteOnMap(pickupCoordinate: CLLocationCoordinate2D, destinationCoordinate: CLLocationCoordinate2D, completion: @escaping (_ route: MKRoute?) -> Void) {
+        
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: pickupCoordinate, addressDictionary: nil))
+        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destinationCoordinate, addressDictionary: nil))
+        request.requestsAlternateRoutes = true
+        request.transportType = .automobile
+        
+        let directions = MKDirections(request: request)
+        directions.calculate { response, error in
+            
+            guard let unwrappedResponse = response else {
+                print(error?.localizedDescription ?? "Unknown error")
+                completion(nil)
+                return
+            }
+            
+            guard let route = unwrappedResponse.routes.first else {
+                completion(nil)
+                return
+            }
+            completion(route)
+        }
+    }
 }
 
 extension CoreLocationManager: CLLocationManagerDelegate {
@@ -64,7 +98,9 @@ extension CoreLocationManager: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        AlertModel.shared.showAlert(title: "Error", descr: "Something went wrong. Please try again later", buttonText: "OK")
+        AlertModel.shared.showAlert(title: "attention".localized,
+                                    descr: "locationErrorDescr".localized,
+                                    buttonText: "ok".localized)
         IndicatorModel.loadingIndicator.dismiss(animated: true)
         print("Error occurred: \(error.localizedDescription)")
     }
