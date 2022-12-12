@@ -16,6 +16,7 @@ DerivedData
 *.perspectivev3
 !default.perspectivev3
 xcuserdata
+MapLocationRoute.xcodeproj/project.xcworkspace/xcuserdata/konstantin.xcuserdatad/UserInterfaceState.xcuserstate
 
 ## Other
 *.xccheckout
